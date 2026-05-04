@@ -3,8 +3,8 @@ const SCOREBOARD_API_URL =
 const API_TOKEN = import.meta.env.VITE_CTFD_TOKEN;
 
 /**
- * Récupère les données du scoreboard depuis l'API
- * @returns {Promise<Object>} Les données du scoreboard
+ * Fetches scoreboard data from the API.
+ * @returns {Promise<Object>} The scoreboard data.
  */
 export const fetchScoreboard = async () => {
   try {
@@ -22,13 +22,13 @@ export const fetchScoreboard = async () => {
     
     return await response.json();
   } catch (error) {
-    console.error('Erreur lors de la récupération du scoreboard:', error);
+    console.error('Error while fetching the scoreboard:', error);
     throw error;
   }
 };
 
 /**
- * Hook personnalisé pour récupérer et gérer les données du scoreboard
+ * Custom hook for fetching and managing scoreboard data.
  * @returns {Object} { scoreboard, loading, error }
  */
 export const useScoreboard = () => {
