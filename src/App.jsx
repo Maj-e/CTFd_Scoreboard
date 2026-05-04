@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { fetchScoreboard } from './api/scoreboardApi'
+import ctfBackground from './assets/FONDO-CTF-CIBER-42MLG.png'
 import hadesLogo from './assets/Icono_Hades_2.svg'
 import olympusLogo from './assets/Icono_Olympus_2.svg'
 import voidLogo from './assets/Icono_Void_2.svg'
@@ -57,21 +58,25 @@ function TeamGauge({ score, maxScore, accent }) {
   )
 }
 
-function ScoreboardTeams({ data = [] }) {
-  if (!data.length) {
-    return <p className="empty-state">No teams to display.</p>
-  }
+const COALITIONS = ['hades', 'void', 'olympus']
 
-  const displayTeams = data.slice(0, 3)
+function ScoreboardTeams({ data = [] }) {
+  const mapByName = new Map((data || []).map(t => [String(t.name || '').trim().toLowerCase(), t]))
 
   return (
     <div className="scoreboard-columns">
-      {displayTeams.map((team, index) => {
+      <div className="side-panel" />
+      {COALITIONS.map((coal) => {
+        const found = mapByName.get(coal)
+        const team = found
+          ? found
+          : { name: (TEAM_THEMES[coal]?.name ?? coal).toString(), score: 0 }
         const theme = getTeamTheme(team.name)
+
         return (
           <article
             className="team-column"
-            key={team.account_id ?? team.id ?? index}
+            key={coal}
             style={{
               '--team-accent': theme.accent,
               '--team-accent-soft': theme.accentSoft,
@@ -97,11 +102,12 @@ function ScoreboardTeams({ data = [] }) {
             </div>
 
             <div className="team-column__gauge-container">
-              <TeamGauge score={team.score} maxScore={MAX_SCORE} accent={theme.accent} />
+              <TeamGauge score={Number(team.score) || 0} maxScore={MAX_SCORE} accent={theme.accent} />
             </div>
           </article>
         )
       })}
+      <div className="side-panel" />
     </div>
   )
 }
@@ -110,24 +116,50 @@ function App() {
   const [scoreboard, setScoreboard] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const appShellStyle = {
+    '--app-background-image': `url(${ctfBackground})`,
+  }
 
   useEffect(() => {
-    fetchScoreboard()
-      .then(data => {
+    let cancelled = false
+
+    const loadScoreboard = async () => {
+      try {
+        const data = await fetchScoreboard()
+
+        if (cancelled) {
+          return
+        }
+
         setScoreboard(data)
-        setLoading(false)
-      })
-      .catch(err => {
+        setError(null)
+      } catch (err) {
+        if (cancelled) {
+          return
+        }
+
         setError(err)
-        setLoading(false)
-      })
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+        }
+      }
+    }
+
+    loadScoreboard()
+    const intervalId = window.setInterval(loadScoreboard, 1000)
+
+    return () => {
+      cancelled = true
+      window.clearInterval(intervalId)
+    }
   }, [])
 
   const teams = scoreboard?.data ?? []
 
   if (loading) {
     return (
-      <main className="app-shell">
+      <main className="app-shell" style={appShellStyle}>
         <p className="status">Loading...</p>
       </main>
     )
@@ -135,14 +167,14 @@ function App() {
 
   if (error) {
     return (
-      <main className="app-shell">
+      <main className="app-shell" style={appShellStyle}>
         <p className="status status--error">Error: {error.message}</p>
       </main>
     )
   }
 
   return (
-    <main className="app-shell app-shell--fullscreen">
+    <main className="app-shell app-shell--fullscreen" style={appShellStyle}>
       <ScoreboardTeams data={teams} />
     </main>
   )
