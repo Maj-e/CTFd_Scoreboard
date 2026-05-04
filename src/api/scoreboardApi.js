@@ -12,6 +12,7 @@ export const fetchScoreboard = async () => {
     if (API_TOKEN) {
       headers.Authorization = `Token ${API_TOKEN}`;
     }
+    headers['Content-Type'] = 'application/json';
 
     const response = await fetch(SCOREBOARD_API_URL, { headers });
     
