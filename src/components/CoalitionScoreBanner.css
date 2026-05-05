@@ -21,6 +21,10 @@
   overflow: hidden;
   pointer-events: none;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
   animation: coalition-score-banner-enter 350ms ease-out, coalition-score-banner-exit 350ms ease-in 3300ms forwards;
 }
 
@@ -35,6 +39,14 @@
 .coalition-score-banner__label {
   position: relative;
   z-index: 1;
+}
+
+.coalition-score-banner__logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
 }
 
 @keyframes coalition-score-banner-enter {
@@ -68,5 +80,11 @@
     padding: 20px 24px;
     border-radius: 12px;
     font-size: 1.1rem;
+    gap: 12px;
+  }
+
+  .coalition-score-banner__logo {
+    width: 40px;
+    height: 40px;
   }
 }

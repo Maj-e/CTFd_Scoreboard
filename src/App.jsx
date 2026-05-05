@@ -87,29 +87,51 @@ function App() {
   const [error, setError] = useState(null)
   const [bannerEvent, setBannerEvent] = useState(null)
   const bannerSequenceRef = useRef(0)
+  const bannerQueueRef = useRef([])
+  const bannerActiveRef = useRef(false)
   const hideTimerRef = useRef(null)
   const appShellStyle = {
     '--app-background-image': `url(${ctfBackground})`,
   }
 
-  const queueBanner = (teamName, points, accent) => {
+  const showNextBanner = () => {
     if (hideTimerRef.current) {
       window.clearTimeout(hideTimerRef.current)
+      hideTimerRef.current = null
     }
 
-    const nextSequence = bannerSequenceRef.current + 1
-    bannerSequenceRef.current = nextSequence
+    const nextEvent = bannerQueueRef.current.shift()
 
-    setBannerEvent({
-      teamName,
-      points,
-      accent,
-      sequence: nextSequence,
-    })
+    if (!nextEvent) {
+      bannerActiveRef.current = false
+      setBannerEvent(null)
+      return
+    }
+
+    bannerActiveRef.current = true
+    setBannerEvent(nextEvent)
 
     hideTimerRef.current = window.setTimeout(() => {
       setBannerEvent(null)
+      showNextBanner()
     }, 4000)
+  }
+
+  const queueBanner = (teamName, points, accent, logo) => {
+    const nextSequence = bannerSequenceRef.current + 1
+    bannerSequenceRef.current = nextSequence
+
+    bannerQueueRef.current.push({
+      teamName,
+      points,
+      accent,
+      logo,
+      sequence: nextSequence,
+    })
+
+    if (!bannerActiveRef.current) {
+      showNextBanner()
+    }
   }
 
   useEffect(() => {
@@ -128,10 +150,13 @@ function App() {
         const scoreIncreases = compareWithPreviousScores(currentScores)
 
         if (scoreIncreases.length > 0) {
-          const firstIncrease = scoreIncreases[0]
-          const teamTheme = getTeamTheme(data?.data?.find(team => String(team?.name ?? '').trim().toLowerCase() === firstIncrease.teamKey)?.name)
+          for (const increase of scoreIncreases) {
+            const teamTheme = getTeamTheme(
+              data?.data?.find(team => String(team?.name ?? '').trim().toLowerCase() === increase.teamKey)?.name,
+            )
 
-          queueBanner(teamTheme.name, firstIncrease.points, teamTheme.accent)
+            queueBanner(teamTheme.name, increase.points, teamTheme.accent, teamTheme.logo)
+          }
         }
 
         setScoreboard(data)
@@ -159,6 +184,9 @@ function App() {
       if (hideTimerRef.current) {
         window.clearTimeout(hideTimerRef.current)
       }
+
+      bannerQueueRef.current = []
+      bannerActiveRef.current = false
 
       resetScoreCache()
     }
