@@ -1,43 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { fetchScoreboard } from './api/scoreboardApi'
 import ctfBackground from './assets/FONDO-CTF-CIBER-42MLG.png'
-import hadesLogo from './assets/Icono_Hades_2.svg'
-import olympusLogo from './assets/Icono_Olympus_2.svg'
-import voidLogo from './assets/Icono_Void_2.svg'
+import CoalitionScoreBanner from './components/CoalitionScoreBanner'
+import { TEAM_THEMES, getTeamTheme } from './utils/teamThemes'
+import { compareWithPreviousScores, getTeamScores, resetScoreCache } from './utils/scoreboardDiff'
 import './App.css'
 
 const MAX_SCORE = 2000
-
-const TEAM_THEMES = {
-  hades: {
-    name: 'Hades',
-    accent: '#ef4444',
-    accentSoft: 'rgba(239, 68, 68, 0.18)',
-    logo: hadesLogo,
-  },
-  void: {
-    name: 'Void',
-    accent: '#8b5cf6',
-    accentSoft: 'rgba(139, 92, 246, 0.18)',
-    logo: voidLogo,
-  },
-  olympus: {
-    name: 'Olympus',
-    accent: '#3b82f6',
-    accentSoft: 'rgba(59, 130, 246, 0.18)',
-    logo: olympusLogo,
-  },
-}
-
-const DEFAULT_TEAM_THEME = {
-  accent: '#fbbf24',
-  accentSoft: 'rgba(251, 191, 36, 0.18)',
-  logo: null,
-}
-
-function getTeamTheme(teamName) {
-  return TEAM_THEMES[teamName?.trim().toLowerCase()] ?? DEFAULT_TEAM_THEME
-}
 
 function TeamGauge({ score, maxScore, accent }) {
   const safeScore = Number.isFinite(score) ? score : 0
@@ -116,8 +85,31 @@ function App() {
   const [scoreboard, setScoreboard] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [bannerEvent, setBannerEvent] = useState(null)
+  const bannerSequenceRef = useRef(0)
+  const hideTimerRef = useRef(null)
   const appShellStyle = {
     '--app-background-image': `url(${ctfBackground})`,
+  }
+
+  const queueBanner = (teamName, points, accent) => {
+    if (hideTimerRef.current) {
+      window.clearTimeout(hideTimerRef.current)
+    }
+
+    const nextSequence = bannerSequenceRef.current + 1
+    bannerSequenceRef.current = nextSequence
+
+    setBannerEvent({
+      teamName,
+      points,
+      accent,
+      sequence: nextSequence,
+    })
+
+    hideTimerRef.current = window.setTimeout(() => {
+      setBannerEvent(null)
+    }, 2600)
   }
 
   useEffect(() => {
@@ -129,6 +121,21 @@ function App() {
 
         if (cancelled) {
           return
+        }
+
+        const currentScores = getTeamScores(data?.data ?? [])
+
+        const scoreIncreases = compareWithPreviousScores(currentScores)
+
+        if (scoreIncreases.length > 0) {
+          const firstIncrease = scoreIncreases[0]
+          const teamTheme = getTeamTheme(data?.data?.find(team => String(team?.name ?? '').trim().toLowerCase() === firstIncrease.teamKey)?.name)
+
+          window.alert(
+            `DEBUG score change\n${teamTheme.name}: +${firstIncrease.points}`,
+          )
+
+          queueBanner(teamTheme.name, firstIncrease.points, teamTheme.accent)
         }
 
         setScoreboard(data)
@@ -152,6 +159,12 @@ function App() {
     return () => {
       cancelled = true
       window.clearInterval(intervalId)
+
+      if (hideTimerRef.current) {
+        window.clearTimeout(hideTimerRef.current)
+      }
+
+      resetScoreCache()
     }
   }, [])
 
@@ -175,6 +188,7 @@ function App() {
 
   return (
     <main className="app-shell app-shell--fullscreen" style={appShellStyle}>
+      <CoalitionScoreBanner event={bannerEvent} />
       <ScoreboardTeams data={teams} />
     </main>
   )
