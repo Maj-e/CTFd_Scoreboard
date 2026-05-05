@@ -21,7 +21,7 @@ export default function CoalitionScoreBanner({ event }) {
         />
       )}
       <span className="coalition-score-banner__label">
-        {event.teamName} scored {event.points} points
+        {event.teamName} {event.action} {event.points} points
       </span>
     </div>
   )

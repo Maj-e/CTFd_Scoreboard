@@ -14,16 +14,17 @@ export function getTeamScores(teams = []) {
   return scores
 }
 
-export function findScoreIncreases(previousScores, currentScores) {
+export function findScoreChanges(previousScores, currentScores) {
   const events = []
 
   for (const [teamKey, currentScore] of currentScores.entries()) {
     const previousScore = previousScores.get(teamKey) ?? 0
+    const delta = currentScore - previousScore
 
-    if (currentScore > previousScore) {
+    if (delta !== 0) {
       events.push({
         teamKey,
-        points: currentScore - previousScore,
+        delta,
       })
     }
   }
@@ -32,10 +33,10 @@ export function findScoreIncreases(previousScores, currentScores) {
 }
 
 export function compareWithPreviousScores(currentScores) {
-  const scoreIncreases = findScoreIncreases(previousScoresCache, currentScores)
+  const scoreChanges = findScoreChanges(previousScoresCache, currentScores)
   previousScoresCache = new Map(currentScores)
 
-  return scoreIncreases
+  return scoreChanges
 }
 
 export function resetScoreCache(initialScores = new Map()) {

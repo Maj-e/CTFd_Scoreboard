@@ -117,13 +117,14 @@ function App() {
     }, 4000)
   }
 
-  const queueBanner = (teamName, points, accent, logo) => {
+  const queueBanner = (teamName, points, action, accent, logo) => {
     const nextSequence = bannerSequenceRef.current + 1
     bannerSequenceRef.current = nextSequence
 
     bannerQueueRef.current.push({
       teamName,
       points,
+      action,
       accent,
       logo,
       sequence: nextSequence,
@@ -147,15 +148,17 @@ function App() {
 
         const currentScores = getTeamScores(data?.data ?? [])
 
-        const scoreIncreases = compareWithPreviousScores(currentScores)
+        const scoreChanges = compareWithPreviousScores(currentScores)
 
-        if (scoreIncreases.length > 0) {
-          for (const increase of scoreIncreases) {
+        if (scoreChanges.length > 0) {
+          for (const change of scoreChanges) {
             const teamTheme = getTeamTheme(
-              data?.data?.find(team => String(team?.name ?? '').trim().toLowerCase() === increase.teamKey)?.name,
+              data?.data?.find(team => String(team?.name ?? '').trim().toLowerCase() === change.teamKey)?.name,
             )
+            const action = change.delta > 0 ? 'scored' : 'spent'
+            const points = Math.abs(change.delta)
 
-            queueBanner(teamTheme.name, increase.points, teamTheme.accent, teamTheme.logo)
+            queueBanner(teamTheme.name, points, action, teamTheme.accent, teamTheme.logo)
           }
         }
 
