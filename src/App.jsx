@@ -109,7 +109,7 @@ function App() {
 
     hideTimerRef.current = window.setTimeout(() => {
       setBannerEvent(null)
-    }, 2600)
+    }, 4000)
   }
 
   useEffect(() => {
@@ -130,10 +130,6 @@ function App() {
         if (scoreIncreases.length > 0) {
           const firstIncrease = scoreIncreases[0]
           const teamTheme = getTeamTheme(data?.data?.find(team => String(team?.name ?? '').trim().toLowerCase() === firstIncrease.teamKey)?.name)
-
-          window.alert(
-            `DEBUG score change\n${teamTheme.name}: +${firstIncrease.points}`,
-          )
 
           queueBanner(teamTheme.name, firstIncrease.points, teamTheme.accent)
         }

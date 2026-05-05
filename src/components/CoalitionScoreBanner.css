@@ -1,24 +1,27 @@
 .coalition-score-banner {
-  position: absolute;
-  top: 24px;
+  position: fixed;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  z-index: 5;
-  max-width: min(92vw, 720px);
-  padding: 16px 24px;
-  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+  width: 33vw;
+  max-width: min(90vw, 800px);
+  padding: 24px 32px;
+  border-radius: 12px;
   background:
     linear-gradient(90deg, color-mix(in srgb, var(--banner-accent) 88%, white 12%), color-mix(in srgb, var(--banner-accent) 72%, black 28%));
   color: #fff;
-  font-size: clamp(1rem, 1.8vw, 1.25rem);
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
   font-weight: 800;
   letter-spacing: 0.02em;
   box-shadow:
-    0 18px 40px rgba(0, 0, 0, 0.3),
+    0 25px 50px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.15);
   overflow: hidden;
-  animation: coalition-score-banner-enter 240ms ease-out, coalition-score-banner-exit 320ms ease-in 2280ms forwards;
+  pointer-events: none;
+  text-align: center;
+  animation: coalition-score-banner-enter 350ms ease-out, coalition-score-banner-exit 350ms ease-in 3300ms forwards;
 }
 
 .coalition-score-banner::before {
@@ -37,32 +40,33 @@
 @keyframes coalition-score-banner-enter {
   from {
     opacity: 0;
-    transform: translate(-50%, -14px) scale(0.96);
+    transform: translate(calc(-50% + 100vw), -50%) scaleX(0.8);
   }
 
   to {
     opacity: 1;
-    transform: translateX(-50%) scale(1);
+    transform: translate(-50%, -50%) scaleX(1);
   }
 }
 
 @keyframes coalition-score-banner-exit {
   from {
     opacity: 1;
-    transform: translateX(-50%) scale(1);
+    transform: translate(-50%, -50%) scaleX(1);
   }
 
   to {
     opacity: 0;
-    transform: translate(-50%, -10px) scale(0.98);
+    transform: translate(calc(-50% - 100vw), -50%) scaleX(0.8);
   }
 }
 
 @media (max-width: 768px) {
   .coalition-score-banner {
-    top: 16px;
-    padding: 14px 18px;
-    border-radius: 20px;
-    text-align: center;
+    top: 50%;
+    width: 90vw;
+    padding: 20px 24px;
+    border-radius: 12px;
+    font-size: 1.1rem;
   }
 }

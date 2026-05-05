@@ -5,7 +5,6 @@
 .app-shell {
   height: 100vh;
   padding: 24px;
-  position: relative;
   isolation: isolate;
   background:
     linear-gradient(180deg, rgba(10, 15, 28, 0.72), rgba(10, 15, 28, 0.86)),
@@ -34,7 +33,7 @@
   z-index: 0;
 }
 
-.app-shell > * {
+.app-shell > :not(.coalition-score-banner) {
   position: relative;
   z-index: 1;
 }
