@@ -1,5 +1,5 @@
 const SCOREBOARD_API_URL_RAW =
-  import.meta.env.VITE_SCOREBOARD_API_URL || '/api/v1/scoreboard';
+  import.meta.env.VITE_SCOREBOARD_API_URL || 'https://lloreria.pro/api/v1/scoreboard';
 const SCOREBOARD_API_URL = SCOREBOARD_API_URL_RAW.startsWith('http://')
   ? SCOREBOARD_API_URL_RAW.replace('http://', 'https://')
   : SCOREBOARD_API_URL_RAW;
